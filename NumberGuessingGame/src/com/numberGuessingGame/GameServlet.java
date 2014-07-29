@@ -26,7 +26,7 @@ public class GameServlet extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String guessString;
+		String guessString = null;
 		int guess = 0;
 		
 		resp.getWriter().println("<html>");
@@ -34,43 +34,54 @@ public class GameServlet extends HttpServlet {
 		resp.getWriter().println("<title>Result</title>");
 		resp.getWriter().println("</head>");
 		resp.getWriter().println("<body>");
-			
-		guessString = req.getParameter("userGuess");
 		
-		// Checks to make sure the number input is of type int to prevent NumberFormatException
-		if (guessString.indexOf(".") == -1) {
-			guess = Integer.parseInt(req.getParameter("userGuess"));
-			
-			// If user guess is correct, user is notified and game ends
-			if (guess == answer) {
-				resp.getWriter().println("You are correct!");
-				resetGame();
-			}	
-			// If user guess is incorrect, number of tries for the user is decreased by one, stating how many tries remain and allowing the user to input a new guess
-			else if(numOfGuesses > 1) {
-				decreaseNumOfGuesses();
-				resp.getWriter().println("Wrong answer! You have " + numOfGuesses + " remaining.");
+		// Make sure the user did not leave text field blank
+		if (req.getParameter("userGuess") != "") {
+			guessString = req.getParameter("userGuess");
+		
+			// Checks to make sure the number input is of type int to prevent NumberFormatException
+			if (guessString.indexOf(".") == -1) {
+				guess = Integer.parseInt(req.getParameter("userGuess"));
+
+				// If user guess is correct, user is notified and game ends
+				if (guess == answer) {
+					resp.getWriter().println("You are correct!");
+					resetGame();
+				}	
+				// If user guess is incorrect, number of tries for the user is decreased by one, stating how many tries remain and allowing the user to input a new guess
+				else if(numOfGuesses > 1) {
+					decreaseNumOfGuesses();
+					resp.getWriter().println("Wrong answer! You have " + numOfGuesses + " remaining.");
+					resp.getWriter().println("<form action=\"servlet1\" method=\"get\">");
+					// HTML is set so that input must be between 1 and 20, and in increments of 1 to prevent values such as 1.1
+					resp.getWriter().println("Enter a number from 1 to 20: <input type=\"number\" name=\"userGuess\" min=\"1\" max=\"20\" step=\"1\"> <br>");				
+					resp.getWriter().println("<input type=\"submit\" value=\"Enter\">");
+					resp.getWriter().println("</form>");
+				}
+				// Once user runs out of guesses, game is over and the correct answer is shown
+				else {
+					resp.getWriter().println("You lose.  The answer was " + answer);
+					resetGame();
+				}
+			}
+
+			// If input has a decimal point, user is told to enter an integer
+			else {
+				resp.getWriter().println("Input your guess without decimal points.");
 				resp.getWriter().println("<form action=\"servlet1\" method=\"get\">");
-				// HTML is set so that input must be between 1 and 20, and in increments of 1 to prevent values such as 1.1
 				resp.getWriter().println("Enter a number from 1 to 20: <input type=\"number\" name=\"userGuess\" min=\"1\" max=\"20\" step=\"1\"> <br>");				
 				resp.getWriter().println("<input type=\"submit\" value=\"Enter\">");
 				resp.getWriter().println("</form>");
 			}
-			// Once user runs out of guesses, game is over and the correct answer is shown
-			else {
-				resp.getWriter().println("You lose.  The answer was " + answer);
-				resetGame();
-			}
 		}
 		
-		// If input is a double, user is told to enter an integer
 		else {
-			resp.getWriter().println("Input your guess without decimal points.");
+			resp.getWriter().println("No number entered.");
 			resp.getWriter().println("<form action=\"servlet1\" method=\"get\">");
 			resp.getWriter().println("Enter a number from 1 to 20: <input type=\"number\" name=\"userGuess\" min=\"1\" max=\"20\" step=\"1\"> <br>");				
 			resp.getWriter().println("<input type=\"submit\" value=\"Enter\">");
 			resp.getWriter().println("</form>");
-		}
+	}
 		
 		resp.getWriter().println("</body>");
 		resp.getWriter().println("</html>");
